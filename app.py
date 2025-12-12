@@ -115,13 +115,13 @@ class LocalRAG:
         
         if verbose:
             print(f"\nAnswer: {result['result']}")
-            print(f"\n📚 Sources: {len(result['source_documents'])} document chunks used")
+            print(f"\n Sources: {len(result['source_documents'])} document chunks used")
             
             # Optionally show source
             if result['source_documents']:
                 print("\nRelevant excerpts:")
                 for i, doc in enumerate(result['source_documents'][:2], 1):
-                    content = doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content
+                    content = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
                     print(f"\n{i}. {content}")
         
         return result
@@ -136,13 +136,13 @@ class LocalRAG:
         
         if verbose:
             print(f"\nAnswer: {result['result']}")
-            print(f"\n📚 Sources: {len(result['source_documents'])} document chunks used")
+            print(f"\n Sources: {len(result['source_documents'])} document chunks used")
             
             # Optionally show source 
             if result['source_documents']:
                 print("\nRelevant excerpts:")
                 for i, doc in enumerate(result['source_documents'][:2], 1):
-                    content = doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content
+                    content = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
                     print(f"\n{i}. {content}")
         
         return result

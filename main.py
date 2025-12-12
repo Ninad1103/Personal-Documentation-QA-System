@@ -64,16 +64,8 @@ def main():
     if not rag.initialize():
         return
     
-    print("\n Initialization complete!")
-    
-    # Check for direct question mode
-    if len(sys.argv) > 1 and not force_rebuild:
-        # Direct question mode
-        question = " ".join(sys.argv[1:])
-        rag.ask(question)
-    else:
-        # Interactive mode
-        interactive_mode(rag)
+    print("\n Initialization complete!")    
+    interactive_mode(rag)
 
 if __name__ == "__main__":
     main()
