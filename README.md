@@ -11,6 +11,8 @@ A personal Documention Question Answering System.
 - Statistics about loaded documents
 
 ## Installation
+Please make sure to have ollama installed and running.
+Have a folder named documents in the same directory as the main.py file with required documents inside the folder.
 
 ```bash
 pip install -r requirements.txt
