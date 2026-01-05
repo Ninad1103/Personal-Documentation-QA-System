@@ -154,7 +154,15 @@ class LocalRAG:
         collection = self.vectorstore._collection
         count = collection.count()
         
+        # Count documents in the documents folder
+        from pathlib import Path
+        doc_path = Path(self.documents_path)
+        pdf_count = len(list(doc_path.glob("**/*.pdf")))
+        txt_count = len(list(doc_path.glob("**/*.txt")))
+        total_docs = pdf_count + txt_count
+        
         return {
+            "total_documents": total_docs,
             "total_chunks": count,
             "model": self.model_name,
             "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"

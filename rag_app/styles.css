@@ -1,0 +1,58 @@
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.upload {
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.delete {
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.ask {
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#ask-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#ask-form textarea {
+    width: 300px;
+    margin-right: 10px;
+}
+
+.answer {
+    display: none;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#delete-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#stats {
+    margin-top: 15px;
+}

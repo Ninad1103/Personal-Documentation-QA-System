@@ -4,3 +4,7 @@ langchain-text-splitters
 chromadb
 sentence-transformers
 pypdf
+fastapi
+uvicorn
+python-multipart
+pydantic

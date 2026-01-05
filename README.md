@@ -12,14 +12,24 @@ A personal Documention Question Answering System.
 
 ## Installation
 Please make sure to have ollama installed and running.
-Have a folder named documents in the same directory as the main.py file with required documents inside the folder.
+Make sure to be in the RAG directory.
 
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Usage
+Server:
+```bash
+python.exe -m uvicorn server.server:app --reload
+```
 
+Client:
+```bash
+python -m http.server 8080
+```
+
+For terminal based usage:
 ```bash
 python main.py
 ```
