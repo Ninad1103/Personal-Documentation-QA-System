@@ -10,8 +10,19 @@ A personal Documention Question Answering System.
 - Question answering with source documents
 - Statistics about loaded documents
 
+![Demo App](demo.png)
+
+
+## Prerequisites
+
+1. Install [Ollama](https://ollama.com).
+2. Pull the required model:
+```bash
+ollama pull llama3.2:3b
+```
+
 ## Installation
-Please make sure to have ollama installed and running.
+
 Make sure to be in the RAG directory.
 
 ```bash
@@ -19,15 +30,15 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-Server:
+
+Start the RAG server (which also serves the frontend):
+
 ```bash
-python.exe -m uvicorn server.server:app --reload
+python -m uvicorn server.server:app --reload
 ```
 
-Client:
-```bash
-python -m http.server 8080
-```
+Once the server is running, open your browser and navigate to:
+**http://localhost:8000**
 
 For terminal based usage:
 ```bash
