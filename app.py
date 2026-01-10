@@ -3,8 +3,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.llms import Ollama
-from langchain_classic.chains import RetrievalQA
 from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 import os
 
 class LocalRAG:
@@ -13,6 +14,7 @@ class LocalRAG:
         self.model_name = model_name
         self.vectorstore = None
         self.qa_chain = None
+        self.retriever = None
     
     def load_documents(self):
         pdf_loader = DirectoryLoader(
@@ -55,26 +57,32 @@ class LocalRAG:
         print(f"Creating QA chain...")
         llm = Ollama(model=self.model_name)
         
-        self.qa_chain = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=self.vectorstore.as_retriever(search_kwargs={"k": 3}),
-            return_source_documents=True,
-            chain_type_kwargs={
-                "prompt": PromptTemplate.from_template(
-                    """
-                    <s>[INST] You are a helpful assistant. 
-                    Given the following extracted parts of a long document and a question, 
-                    answer the question.
-                    If you don't know the answer, just say that you don't know.
-                    <</s>
-                    <s>[INST] {context}
-                    Question: {question}
-                    Answer: 
-                    <</s>
-                    """
-                )
-            }
+        # Define the prompt
+        template = """
+        <s>[INST] You are a helpful assistant. 
+        Given the following extracted parts of a long document and a question, 
+        answer the question using only the information provided in the document.
+        If you don't know the answer, just say that you don't know.
+        <</s>
+        <s>[INST] {context}
+        Question: {question}
+        Answer: 
+        <</s>
+        """
+        prompt = PromptTemplate.from_template(template)
+        
+        # Configure retriever
+        self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 2})
+        
+        # Define the LCEL chain
+        def format_docs(docs):
+            return "\n\n".join(doc.page_content for doc in docs)
+
+        self.qa_chain = (
+            {"context": self.retriever | format_docs, "question": RunnablePassthrough()}
+            | prompt
+            | llm
+            | StrOutputParser()
         )
         print(f"QA chain created.")
 
@@ -101,51 +109,16 @@ class LocalRAG:
         self.create_qa_chain()
         return True
 
-    def ask(self, question, verbose=True):
+    async def ask(self, question):
+        """
+        Modified to return a generator for streaming.
+        """
         if not self.qa_chain:
             raise Exception("System not initialized! Call initialize() first.")
         
-        if verbose:
-            print(f"\n{'='*60}")
-            print(f"Question: {question}")
-            print(f"{'='*60}")
-            print("Thinking...")
-        
-        result = self.qa_chain.invoke({"query": question})
-        
-        if verbose:
-            print(f"\nAnswer: {result['result']}")
-            print(f"\n Sources: {len(result['source_documents'])} document chunks used")
-            
-            # Optionally show source
-            if result['source_documents']:
-                print("\nRelevant excerpts:")
-                for i, doc in enumerate(result['source_documents'][:2], 1):
-                    content = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
-                    print(f"\n{i}. {content}")
-        
-        return result
-        
-        if verbose:
-            print(f"\n{'='*60}")
-            print(f"Question: {question}")
-            print(f"{'='*60}")
-            print("Thinking...")
-
-        result = self.qa_chain.invoke({"query": question})
-        
-        if verbose:
-            print(f"\nAnswer: {result['result']}")
-            print(f"\n Sources: {len(result['source_documents'])} document chunks used")
-            
-            # Optionally show source 
-            if result['source_documents']:
-                print("\nRelevant excerpts:")
-                for i, doc in enumerate(result['source_documents'][:2], 1):
-                    content = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
-                    print(f"\n{i}. {content}")
-        
-        return result
+        print(f"Streaming (async) answer for: {question}")
+        async for chunk in self.qa_chain.astream(question):
+            yield chunk
     
     def get_stats(self):
         if not self.vectorstore:

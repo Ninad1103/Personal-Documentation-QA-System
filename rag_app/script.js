@@ -62,9 +62,20 @@ document.getElementById('ask-form').addEventListener('submit', async function (e
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ question: question })
         });
-        const data = await response.json();
-        answerText.textContent = data.answer || data.response || 'No response';
+
+        answerText.textContent = '';
         answerDiv.style.display = 'block';
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const text = decoder.decode(value, { stream: true });
+            answerText.textContent += text;
+        }
+
     } catch (error) {
         answerText.textContent = 'Error: ' + error.message;
         answerDiv.style.display = 'block';

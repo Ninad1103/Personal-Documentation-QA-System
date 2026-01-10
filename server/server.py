@@ -48,15 +48,6 @@ async def health():
         "status": "healthy",
         "rag_initialized": rag is not None and rag.vectorstore is not None
     }
-        
-"""
-Endpoints needed:
-    1. /health - get
-    2. /upload - post
-    3. /stats   - get
-    4. /query   - post
-    5. /reinitialize - post 
-"""
 
 @app.post("/upload")
 async def upload_documents(file: UploadFile = File(...)):
@@ -97,23 +88,23 @@ async def get_stats():
         return {"status": "Inactive", "total_documents": 0, "total_chunks": 0}
     return {"status": "Active", **stats}
 
-@app.post("/query", response_model=dict)
+@app.post("/query")
 async def query(question: Question):
     """Query the RAG system"""
-    if not rag or not rag.qa_chain:
+    if not rag: # or not rag.qa_chain (rag object has qa_chain inside, check done in ask)
         raise HTTPException(status_code=400, detail="RAG system is not initialized")
     #question cannot be empty
     if not question.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty")
     try:
         print(f"Received question: {question.question}")
-        result = rag.ask(question.question, verbose = False)
-        print(f"RAG result keys: {result.keys()}")
-        sources = [doc.page_content[:200] for doc in result.get('source_documents', [])]
-        return {
-            "answer": result['result'],
-            "sources": sources
-        }
+        
+        # Generator for streaming
+        async def generate():
+            async for chunk in rag.ask(question.question):
+                yield chunk
+
+        return StreamingResponse(generate(), media_type="text/plain")
     except Exception as e:
         import traceback
         traceback.print_exc()
